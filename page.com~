@@ -1,0 +1,117 @@
+#! /bin/tcsh -f
+#
+#	send email to somebody's cell phone
+#
+#
+set path = ( /programs/beamline/ $path )
+rehash
+# "database" of cell numbers:
+set numbers = /data/calibrations/pager_numbers.txt
+goto Setup
+Help:
+cat << EOF
+usage: page.com name message
+where: name is the person/lab you want to page
+       message is the text you want to send them
+       
+example:
+
+page.com beamline "beam is back up"
+
+EOF
+exit 9
+
+Setup:
+# backup, in case things change
+if(! -e "$numbers") set numbers = ~jamesh/pager_numbers.txt
+if(! -e "$numbers") then
+    set numbers = /tmp/numbers$$
+    cat << EOF >! $numbers
+5105412405@mmode.com               BeamBoy_x2500
+5102064893@mmode.com               BeamBoy2_x2900
+5105201423@txt.att.net 		   Cool Hand Luke 
+5105016081@mmode.com               Banumathi Sankaran
+5109285556@mobile.mycingular.com   James Holton
+5105023853@mmode.com               James Holton
+5102073166@mmode.com               Ken Frankel
+5109256352@mmode.com               Greg Hura
+5102064418@mobile.mycingular.com   Scott Classen
+5105201423@txt.att.net 		   George Meigs
+5109280580@mmode.com               Paul Adams
+5107016836@mmode.com               Nathan Smith
+5105902915@mmode.com               Azer Dauz
+5102066349@mmode.com               Jeff Dickert
+5103902273@mmode.com               Thomas Earnest
+9795750746@mmode.com               Ganesh Rajagopalan
+5108134148@mmode.com               Corie Ralston
+5105022676@mmode.com               Anthony Rozales
+8584420930@vtext.com               Gyorgy Snell
+5102196700@mmode.com               John Taylor
+5105902913@mmode.com               Christine Trame
+5103643758@mmode.com               Simon Morton
+5105207038@mmode.com               Jane Tanamachi
+5108409544@myairmail.com           beamline Berger
+5108409612@myairmail.com           Tom Alber
+5108409644@myairmail.com           Jamie Cate
+5108409280@myairmail.com           John Kuriyan
+5108409376@myairmail.com           Bob Glaeser	
+5108409746@myairmail.com           James Holton
+EOF
+endif
+
+# come up with a call-back phone number
+set callback = 5104952083
+set beamline = `beamline.com`
+if("$beamline" == 501) set callback = 5104952054
+if("$beamline" == 502) set callback = 5104952052
+if("$beamline" == 503) set callback = 5104952053
+if("$beamline" == 821) set callback = 5104952081
+if("$beamline" == 822) set callback = 5104952082
+if("$beamline" == 831) set callback = 5104952083
+if("$beamline" == 1231) set callback = 5104952134
+
+if("$1" == "") goto Help
+set name = "$1"
+if ("$name" == "") goto Help
+set message = ( $* )
+set message[1] = ""
+if ("$message" == "") set message = "you have beamtime! "
+
+set now = `date | awk '{print $4}' | awk -F "[:]" '{print $1":"$2}'`
+set now = `date +"%l:%M %p"`
+
+# this helps make sure "duplicate" pages get through
+set message = "$now $message"
+
+# alias to page any on-call person
+if(`echo $name | awk '{gsub(" ",""); print tolower($0)}'` == "oncall") then
+    # figure out on-call person
+#    foreach name ( `oncall.com` )
+#	# hey, look! recursion!
+#        if (`echo $name | awk '{gsub(" ",""); print tolower($0)}'` != "oncall") then
+#	    page.com "$name" "$message"
+#	endif
+#    end
+    # also page the "beam boy" phone
+    page.com x2500 "$message"
+    page.com x2900 "$message"
+    echo "${message}" | mail -s "alert" beamline-support@lbl.gov
+    exit
+endif
+
+# extract the cell phone's email address from the list
+set number = `grep -i "$name" $numbers | head -1 | awk '{print $1}'`
+# delete temporary phone number file (if it's there)
+if("$numbers" =~ *$$) rm -f $numbers
+if("$name" =~ *@*) set number = "$name"
+if("$number" == "") goto Help
+
+# do the actual email
+echo "sending "\""$message"\"" to $number"
+echo "${message}" | mail ${number}
+
+exit
+
+# alert James's cell phone
+echo "beamline is idle! " | mail 5109285556@mmode.com     
+
