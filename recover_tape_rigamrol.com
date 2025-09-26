@@ -58,7 +58,7 @@ if($?CRAPPY_TAPE) then
     end
 endif
 
-~jamesh/archiving/identify_tape.com $devtape |& tee identify_tape.log
+identify_tape.com $devtape |& tee identify_tape.log
 mt -f $devtape load
 egrep "^set " identify_tape.log >! sourceme.txt
 source sourceme.txt

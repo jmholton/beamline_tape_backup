@@ -19,7 +19,7 @@ set CPUs = `grep proc /proc/cpuinfo | wc -l | awk '{print $NF/2+1}'`
 
 
 if(! -x ./image_md5_extract.com) then
-    cp ~jamesh/archiving/image_md5_extract.com .
+    cp ~${USER}/archiving/image_md5_extract.com .
 endif
 if(! -x ./image_md5_extract.com) then
     set BAD = "cannot find image_md5_extract.com"

@@ -312,10 +312,10 @@ tcsh -vf
 cd /local/maintain_alsenable
 ln -sf /filecache/alsenable_local/alsenable .
 
-~jamesh/archiving/maintain_tapecache.com stream=alsenable dir=/alsenable/ dirhost=petabyte cache=/filecache/alsenable_local nowrite &
+maintain_tapecache.com stream=alsenable dir=/alsenable/ dirhost=petabyte cache=/filecache/alsenable_local nowrite &
 
 
-~jamesh/archiving/maintain_tapecache.com stream=alsenable dir=/alsenable/ dirhost=archive3 cache=/filecache/alsenable_local nowrite nodate &
+maintain_tapecache.com stream=alsenable dir=/alsenable/ dirhost=archive3 cache=/filecache/alsenable_local nowrite nodate &
 
 ./linkify_image_duplicates.com
 ./fix_image_dates.com
